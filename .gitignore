@@ -1,0 +1,10 @@
+# Object files
+*.o
+
+# Executables
+*.out
+
+# Files produced by yacc and lex
+jack.tab.c
+jack.tab.h
+lex.yy.c
