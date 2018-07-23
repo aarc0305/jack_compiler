@@ -13,6 +13,9 @@
 	Type_t typeVal;
 	Class_Name_t classNameVal;
 	Var_Name_t varNameVal;
+	List_t commaVarNamesVal;
+	Comma_Var_Name_t commaVarNameVal;
+	Sub_Routine_Name_t subRoutineNameVal;
 	int intNumVal;
 	char* idVal;
 };
@@ -49,6 +52,9 @@
 %type <typeVal> type
 %type <classNameVal> className
 %type <varNameVal> varName 
+%type <commaVarNamesVal> commaVarNames
+%type <commaVarNameVal> commaVarName
+%type <subRoutineNameVal> subRoutineName
 
 %%
 
@@ -59,7 +65,8 @@ classVarDecs: classVarDec classVarDecs
 |
 ;
 
-classVarDec: STATIC type varName ';'
+classVarDec: STATIC type varName commaVarNames ';' {$$ = Class_Var_Dec_Static_new($2, $3, $4);}
+| FIELD type varName commaVarNames ';' {$$ = Class_Var_Dec_Field_new($2, $3, $4);}
 ;
 
 type: INT {$$ = Type_new(TYPE_INT);}
@@ -70,7 +77,17 @@ type: INT {$$ = Type_new(TYPE_INT);}
 className: ID {$$ = Class_Name_new($1);}
 ;
 
+commaVarNames: commaVarName commaVarNames {$$ = List_new($1, $2);}
+| {$$ = 0;}
+;
+
+commaVarName: ',' varName {$$ = Comma_Var_Name_new($2);}
+;
+
 varName: ID {$$ = Var_Name_new($1);}
+;
+
+subRoutineName: ID {$$ = Sub_Routine_Name_new($1);}
 ;
 
 %%

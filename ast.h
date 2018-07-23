@@ -21,26 +21,6 @@ struct Class_t {
 };
 Class_t Class_new(char* className);
 
-// class var declaration
-typedef struct Class_Var_Dec_t* Class_Var_Dec_t;
-struct Class_Var_Dec_t {
-	Class_Var_Dec_Kind_t kind;
-};
-
-// static class var dec 
-typedef struct Class_Var_Dec_Static* Class_Var_Dec_Static;
-struct Class_Var_Dec_Static {
-	Class_Var_Dec_Kind_t kind;
-};
-Class_Var_Dec_t Class_Var_Dec_Static_new();
-
-// field class var dec 
-typedef struct Class_Var_Dec_Field* Class_Var_Dec_Field;
-struct Class_Var_Dec_Field {
-	Class_Var_Dec_Kind_t kind;
-};
-Class_Var_Dec_t Class_Var_Dec_Field_new();
-
 // type
 typedef struct Type_t* Type_t;
 struct Type_t {
@@ -61,5 +41,45 @@ struct Var_Name_t {
 	char* varName;
 };
 Var_Name_t Var_Name_new(char* varName);
+
+// commaVarName
+typedef struct Comma_Var_Name_t* Comma_Var_Name_t;
+struct Comma_Var_Name_t {
+	Var_Name_t varName;
+};
+Comma_Var_Name_t Comma_Var_Name_new(Var_Name_t varName);
+
+// class var declaration
+typedef struct Class_Var_Dec_t* Class_Var_Dec_t;
+struct Class_Var_Dec_t {
+	Class_Var_Dec_Kind_t kind;
+};
+
+// static class var dec 
+typedef struct Class_Var_Dec_Static* Class_Var_Dec_Static;
+struct Class_Var_Dec_Static {
+	Class_Var_Dec_Kind_t kind;
+	Type_t type;
+	Var_Name_t varName;
+	List_t commaVarNames;
+};
+Class_Var_Dec_t Class_Var_Dec_Static_new(Type_t type, Var_Name_t varName, List_t commaVarNames);
+
+// field class var dec 
+typedef struct Class_Var_Dec_Field* Class_Var_Dec_Field;
+struct Class_Var_Dec_Field {
+	Class_Var_Dec_Kind_t kind;
+	Type_t type;
+	Var_Name_t varName;
+	List_t commaVarNames;
+};
+Class_Var_Dec_t Class_Var_Dec_Field_new(Type_t type, Var_Name_t varName, List_t commaVarNames);
+
+// subRoutineName
+typedef struct Sub_Routine_Name_t* Sub_Routine_Name_t;
+struct Sub_Routine_Name_t {
+	char* subRoutineName;
+};
+Sub_Routine_Name_t Sub_Routine_Name_new(char* subRoutineName);
 
 #endif
