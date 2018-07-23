@@ -1,15 +1,25 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include "ast.h"
 	int yylex();
   	void yyerror (char *);
 %}
 
 %union {
-	int programVal;
+	Class_t classVal;
+	List_t classVarDecsVal;
+	Class_Var_Dec_t classVarDecVal;
+	Type_t typeVal;
+	Class_Name_t classNameVal;
+	Var_Name_t varNameVal;
+	int intNumVal;
+	char* idVal;
 };
 
 // terminal
+%token <intNumVal> INTNUM
+%token <idVal> ID
 %token CLASS
 %token CONSTRUCTOR
 %token FUNCTION
@@ -33,11 +43,35 @@
 %token RETURN
 
 //nonterminal
-%type <programVal> program
+%type <classVal> class
+%type <classVarDecsVal> classVarDecs
+%type <classVarDecVal> classVarDec
+%type <typeVal> type
+%type <classNameVal> className
+%type <varNameVal> varName 
 
 %%
 
-program:
+class: CLASS className '{' classVarDecs '}' 
+;
+
+classVarDecs: classVarDec classVarDecs
+|
+;
+
+classVarDec: STATIC type varName ';'
+;
+
+type: INT {$$ = Type_new(TYPE_INT);}
+| BOOLEAN {$$ = Type_new(TYPE_BOOLEAN);}
+| CHAR {$$ = Type_new(TYPE_CHAR);}
+;
+
+className: ID {$$ = Class_Name_new($1);}
+;
+
+varName: ID {$$ = Var_Name_new($1);}
+;
 
 %%
 

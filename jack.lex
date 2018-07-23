@@ -1,6 +1,7 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include "ast.h"
 	#include "jack.tab.h"
 	char *clone (char *s)
 	{
@@ -54,7 +55,8 @@
 "=" {return '=';}
 "~" {return '~';}
 
-
+[0-9]+ {yylval.intNumVal = atoi(yytext); return INTNUM;}
+[a-zA-Z][a-zA-Z0-9_]* {yylval.idVal = clone(yytext); printf("%s\n", clone(yytext)); return ID;}
 . {printf("lex error!!!\n");}
 
 %%
