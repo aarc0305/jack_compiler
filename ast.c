@@ -2,22 +2,25 @@
 #include <stdlib.h>
 #include "ast.h"
 
-Class_t Class_new(char* className) {
+Class_t Class_new(char* className, List_t classVarDecs) {
 
 }
 
+// type
 Type_t Type_new(Type_Kind_t kind) {
 	Type_t type = malloc(sizeof(*type));
 	type -> kind = kind;
 	return type;
 }
 
+// class name
 Class_Name_t Class_Name_new(char* className) {
 	Class_Name_t name = malloc(sizeof(*name));
 	name -> className = className;
 	return name;
 }
 
+// var name
 Var_Name_t Var_Name_new(char* varName) {
 	Var_Name_t name = malloc(sizeof(*name));
 	name -> varName = varName;
@@ -34,7 +37,8 @@ Comma_Var_Name_t Comma_Var_Name_new(Var_Name_t varName) {
 // static class var dec 
 Class_Var_Dec_t Class_Var_Dec_Static_new(Type_t type, Var_Name_t varName, List_t commaVarNames) {
 	Class_Var_Dec_Static class_var_dec_static = malloc(sizeof(*class_var_dec_static));
-	class_var_dec_static -> type = CLASS_VAR_STATIC;
+	class_var_dec_static -> kind = CLASS_VAR_STATIC;
+	class_var_dec_static -> type = type;
 	class_var_dec_static -> varName = varName;
 	class_var_dec_static -> commaVarNames = commaVarNames;
 	return (Class_Var_Dec_t) class_var_dec_static;
@@ -43,15 +47,42 @@ Class_Var_Dec_t Class_Var_Dec_Static_new(Type_t type, Var_Name_t varName, List_t
 // field class var dec
 Class_Var_Dec_t Class_Var_Dec_Field_new(Type_t type, Var_Name_t varName, List_t commaVarNames) {
 	Class_Var_Dec_Field class_var_dec_field = malloc(sizeof(*class_var_dec_field));
-	class_var_dec_field -> type = CLASS_VAR_FIELD;
+	class_var_dec_field -> kind = CLASS_VAR_FIELD;
+	class_var_dec_field -> type = type;
 	class_var_dec_field -> varName = varName;
 	class_var_dec_field -> commaVarNames = commaVarNames;
 	return (Class_Var_Dec_t) class_var_dec_field;
 }
 
-// subRoutineName
+// sub routine name
 Sub_Routine_Name_t Sub_Routine_Name_new(char* subRoutineName) {
 	Sub_Routine_Name_t sub_routine_name = malloc(sizeof(*sub_routine_name));
 	sub_routine_name -> subRoutineName = subRoutineName;
 	return sub_routine_name;
 }
+
+// keyword constant
+Keyword_Constant_t Keyword_Constant_new(Keyword_Constant_Kind_t kind) {
+	Keyword_Constant_t keyword_constant = malloc(sizeof(*keyword_constant));
+	keyword_constant -> kind = kind;
+	return keyword_constant;
+}
+
+// unary op
+Unary_Op_t Unary_Op_new(Unary_Op_Kind_t kind) {
+	Unary_Op_t unary_op = malloc(sizeof(*unary_op));
+	unary_op -> kind = kind;
+	return unary_op;
+}
+
+// op
+Op_t Op_new(Op_Kind_t kind) {
+	Op_t op_t = malloc(sizeof(*op_t));
+	op_t -> kind = kind;
+	return op_t;
+}
+
+
+
+
+

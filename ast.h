@@ -13,13 +13,38 @@ typedef enum Type_Kind_t {
 	TYPE_CHAR
 } Type_Kind_t;
 
+typedef enum Keyword_Constant_Kind_t {
+	KEYWORD_TRUE,
+	KEYWORD_FALSE,
+	KEYWORD_NULL,
+	KEYWORD_THIS
+} Keyword_Constant_Kind_t;
+
+typedef enum Unary_Op_Kind_t {
+	UNARY_OP_DASH,
+	UNARY_OP_WAVE
+} Unary_Op_Kind_t;
+
+typedef enum Op_Kind_t {
+	OP_PLUS,
+	OP_MINUS,
+	OP_TIMES,
+	OP_DIV,
+	OP_AND,
+	OP_OR,
+	OP_LESS,
+	OP_MORE,
+	OP_EQUAL
+} Op_Kind_t;
+
 // class
 typedef struct Class_t* Class_t;
 struct Class_t {
 	char* className;
+	List_t classVarDecs;
 	// TODO: 1. class var declaration 2. subroutine declaration
 };
-Class_t Class_new(char* className);
+Class_t Class_new(char* className, List_t classVarDecs);
 
 // type
 typedef struct Type_t* Type_t;
@@ -81,5 +106,29 @@ struct Sub_Routine_Name_t {
 	char* subRoutineName;
 };
 Sub_Routine_Name_t Sub_Routine_Name_new(char* subRoutineName);
+
+// keyword constant
+typedef struct Keyword_Constant_t* Keyword_Constant_t;
+struct Keyword_Constant_t {
+	Keyword_Constant_Kind_t kind;
+};
+Keyword_Constant_t Keyword_Constant_new(Keyword_Constant_Kind_t kind);
+
+// unary op
+typedef struct Unary_Op_t* Unary_Op_t;
+struct Unary_Op_t {
+	Unary_Op_Kind_t kind;
+};
+Unary_Op_t Unary_Op_new(Unary_Op_Kind_t kind);
+
+// op
+typedef struct Op_t* Op_t;
+struct Op_t {
+	Op_Kind_t kind;
+};
+Op_t Op_new(Op_Kind_t kind);
+
+
+
 
 #endif

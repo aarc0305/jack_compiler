@@ -13,6 +13,10 @@
 
 %%
 
+" " {continue;}
+"\n" {continue;}
+"\t" {continue;}
+
 "class" {return CLASS;}
 "constructor" {return CONSTRUCTOR;}
 "function" {return FUNCTION;}
@@ -56,7 +60,7 @@
 "~" {return '~';}
 
 [0-9]+ {yylval.intNumVal = atoi(yytext); return INTNUM;}
-[a-zA-Z][a-zA-Z0-9_]* {yylval.idVal = clone(yytext); printf("%s\n", clone(yytext)); return ID;}
+[a-zA-Z][a-zA-Z0-9_]* {yylval.idVal = clone(yytext); return ID;}
 . {printf("lex error!!!\n");}
 
 %%

@@ -16,6 +16,9 @@
 	List_t commaVarNamesVal;
 	Comma_Var_Name_t commaVarNameVal;
 	Sub_Routine_Name_t subRoutineNameVal;
+	Op_t opVal;
+	Unary_Op_t unaryOpVal;
+	Keyword_Constant_t keywordConstantVal;
 	int intNumVal;
 	char* idVal;
 };
@@ -55,14 +58,21 @@
 %type <commaVarNamesVal> commaVarNames
 %type <commaVarNameVal> commaVarName
 %type <subRoutineNameVal> subRoutineName
+%type <opVal> op
+%type <unaryOpVal> unaryOp
+%type <keywordConstantVal> keywordConstant
+
+%start class
 
 %%
+
+// BNF
 
 class: CLASS className '{' classVarDecs '}' 
 ;
 
-classVarDecs: classVarDec classVarDecs
-|
+classVarDecs: classVarDec classVarDecs {$$ = List_new($1, $2);}
+| {$$ = 0;}
 ;
 
 classVarDec: STATIC type varName commaVarNames ';' {$$ = Class_Var_Dec_Static_new($2, $3, $4);}
@@ -89,6 +99,26 @@ varName: ID {$$ = Var_Name_new($1);}
 
 subRoutineName: ID {$$ = Sub_Routine_Name_new($1);}
 ;
+
+op: '+' {$$ = Op_new(OP_PLUS);}
+| '-' {$$ = Op_new(OP_MINUS);}
+| '*' {$$ = Op_new(OP_TIMES);}
+| '/' {$$ = Op_new(OP_DIV);}
+| '&' {$$ = Op_new(OP_AND);}
+| '|' {$$ = Op_new(OP_OR);}
+| '<' {$$ = Op_new(OP_LESS);}
+| '>' {$$ = Op_new(OP_MORE);}
+| '=' {$$ = Op_new(OP_EQUAL);}
+;
+
+unaryOp: '-' {$$ = Unary_Op_new(UNARY_OP_DASH);}
+| '~' {$$ = Unary_Op_new(UNARY_OP_WAVE);}
+;
+
+keywordConstant: TRUE {$$ = Keyword_Constant_new(KEYWORD_TRUE);}
+| FALSE {$$ = Keyword_Constant_new(KEYWORD_FALSE);}
+| _NULL {$$ = Keyword_Constant_new(KEYWORD_NULL);}
+| THIS {$$ = Keyword_Constant_new(KEYWORD_THIS);}
 
 %%
 
