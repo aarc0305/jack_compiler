@@ -15,8 +15,18 @@
 	Var_Name_t varNameVal;
 	List_t commaVarNamesVal;
 	Comma_Var_Name_t commaVarNameVal;
+	Expression_List_t expressionListVal;
+	Expression_t expressionVal;
+	List_t commaExpressionsVal;
+	Comma_Expression_t commaExpressionVal;
+	Term_t termVal;
+	List_t opTermsVal;
+	Op_Term_t opTermVal;
 	Sub_Routine_Name_t subRoutineNameVal;
+	List_t statementsVal;
+	Statement_t statementVal;
 	Op_t opVal;
+	Sub_Routine_Call_t subroutineCallVal;
 	Unary_Op_t unaryOpVal;
 	Keyword_Constant_t keywordConstantVal;
 	int intNumVal;
@@ -47,6 +57,17 @@
 %token ELSE
 %token WHILE
 %token RETURN
+%token ADD
+%token MINUS
+%token TIMES
+%token DIV
+%token AND
+%token OR
+%token MORE
+%token LESS
+%token EQUAL
+%token NOT
+%token ASSIGN
 
 //nonterminal
 %type <classVal> class
@@ -58,9 +79,27 @@
 %type <commaVarNamesVal> commaVarNames
 %type <commaVarNameVal> commaVarName
 %type <subRoutineNameVal> subRoutineName
+%type <statementsVal> statements
+%type <statementVal> statement
+%type <expressionListVal> expressionList
+%type <expressionVal> expression
+%type <commaExpressionsVal> commaExpressions
+%type <commaExpressionVal> commaExpression
+%type <termVal> term
 %type <opVal> op
+%type <subroutineCallVal> subroutineCall
+%type <opTermsVal> opTerms
+%type <opTermVal> opTerm
 %type <unaryOpVal> unaryOp
 %type <keywordConstantVal> keywordConstant
+
+// precedence (same as c language)
+%left OR
+%left AND
+%left LESS MORE EQUAL
+%left ADD MINUS
+%left TIMES DIV
+%left NOT
 
 %start class
 
@@ -68,7 +107,7 @@
 
 // BNF
 
-class: CLASS className '{' classVarDecs '}' 
+class: CLASS className '{' classVarDecs statements '}' 
 ;
 
 classVarDecs: classVarDec classVarDecs {$$ = List_new($1, $2);}
@@ -100,19 +139,67 @@ varName: ID {$$ = Var_Name_new($1);}
 subRoutineName: ID {$$ = Sub_Routine_Name_new($1);}
 ;
 
-op: '+' {$$ = Op_new(OP_PLUS);}
-| '-' {$$ = Op_new(OP_MINUS);}
-| '*' {$$ = Op_new(OP_TIMES);}
-| '/' {$$ = Op_new(OP_DIV);}
-| '&' {$$ = Op_new(OP_AND);}
-| '|' {$$ = Op_new(OP_OR);}
-| '<' {$$ = Op_new(OP_LESS);}
-| '>' {$$ = Op_new(OP_MORE);}
-| '=' {$$ = Op_new(OP_EQUAL);}
+statements: statement statements {$$ = List_new($1, $2);}
+| {$$ = 0;}
 ;
 
-unaryOp: '-' {$$ = Unary_Op_new(UNARY_OP_DASH);}
-| '~' {$$ = Unary_Op_new(UNARY_OP_WAVE);}
+statement: LET varName ASSIGN expression ';' {$$ = Statement_Let_new($2, $4);}
+| IF '(' expression ')' '{' statements '}' {$$ = Statement_If_new($3, $6);}
+| IF '(' expression ')' '{' statements '}' ELSE '{' statements '}' {$$ = Statement_If_Else_new($3, $6, $10);}
+| WHILE '(' expression ')' '{' statements '}' {$$ = Statement_While_new($3, $6);}
+| DO subroutineCall ';' {$$ = Statement_Do_new($2);}
+| RETURN ';' {$$ = Statement_Return_new();}
+| RETURN expression ';' {$$ = Statement_Return_Expression_new($2);}
+;
+
+expressionList: expression commaExpressions {$$ = Expression_List_new($1, $2);}
+| {$$ = 0;}
+;
+
+commaExpressions: commaExpression commaExpressions {$$ = List_new($1, $2);}
+| {$$ = 0;}
+;
+
+commaExpression: ',' expression {$$ = Comma_Expression_new($2);}
+;
+
+expression: term opTerms {$$ = Expression_new($1, $2);}
+;
+
+opTerms: opTerm opTerms {$$ = List_new($1, $2);}
+| {$$ = 0;}
+;
+
+opTerm: op term {$$ = Op_Term_new($1, $2);}
+;
+
+term: INTNUM {$$ = Term_Integer_Constant_new($1);}
+| keywordConstant {$$ = Term_Keyword_Constnant_new($1);}
+| varName {$$ = Term_Var_Name_new($1);}
+| subroutineCall {$$ = Term_Sub_Routine_Call_new($1);}
+| '(' expression ')' {$$ = Term_Expression_new($2);}
+| unaryOp term {$$ = Term_Unary_Op_Term_new($1, $2);}
+;
+
+subroutineCall: subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Self_Function_new($1, $3);}
+// BUG: There are reduce/reduce conflict here because these two rules are the same
+| varName '.' subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Object_Function_new($1, $3, $5);}
+| className '.' subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Static_Function_new($1, $3, $5);}
+;
+
+op: ADD {$$ = Op_new(OP_PLUS);}
+| MINUS {$$ = Op_new(OP_MINUS);}
+| TIMES {$$ = Op_new(OP_TIMES);}
+| DIV {$$ = Op_new(OP_DIV);}
+| AND {$$ = Op_new(OP_AND);}
+| OR {$$ = Op_new(OP_OR);}
+| LESS {$$ = Op_new(OP_LESS);}
+| MORE {$$ = Op_new(OP_MORE);}
+| EQUAL {$$ = Op_new(OP_EQUAL);}
+;
+
+unaryOp: MINUS {$$ = Unary_Op_new(UNARY_OP_DASH);}
+| NOT {$$ = Unary_Op_new(UNARY_OP_WAVE);}
 ;
 
 keywordConstant: TRUE {$$ = Keyword_Constant_new(KEYWORD_TRUE);}

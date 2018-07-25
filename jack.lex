@@ -48,16 +48,17 @@
 "." {return '.';}
 "," {return ',';}
 ";" {return ';';}
-"+" {return '+';}
-"-" {return '-';}
-"*" {return '*';}
-"/" {return '/';}
-"&" {return '&';}
-"|" {return '|';}
-"<" {return '<';}
-">" {return '>';}
-"=" {return '=';}
-"~" {return '~';}
+"+" {return ADD;}
+"-" {return MINUS;}
+"*" {return TIMES;}
+"/" {return DIV;}
+"&" {return AND;}
+"|" {return OR;}
+"<" {return LESS;}
+">" {return MORE;}
+"==" {return EQUAL;}
+"~" {return NOT;}
+"=" {return ASSIGN;}
 
 [0-9]+ {yylval.intNumVal = atoi(yytext); return INTNUM;}
 [a-zA-Z][a-zA-Z0-9_]* {yylval.idVal = clone(yytext); return ID;}
