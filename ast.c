@@ -2,8 +2,12 @@
 #include <stdlib.h>
 #include "ast.h"
 
-Class_t Class_new(char* className, List_t classVarDecs) {
-
+Class_t Class_new(Class_Name_t className, List_t classVarDecs, List_t subroutineDecs) {
+	Class_t class = malloc(sizeof(*class));
+	class -> className = className;
+	class -> classVarDecs = classVarDecs;
+	class -> subroutineDecs = subroutineDecs;
+	return class;
 }
 
 // type
@@ -248,4 +252,59 @@ Statement_t Statement_Return_Expression_new(Expression_t expression) {
 	statement_return_expression -> kind = STATEMENT_RETURN_EXPRESSION;
 	statement_return_expression -> expression = expression;
 	return (Statement_t) statement_return_expression;
+}
+
+// var dec
+Var_Dec_t Var_Dec_new(Type_t type, Var_Name_t varName, List_t commaVarNames) {
+	Var_Dec_t var_dec = malloc(sizeof(*var_dec));
+	var_dec -> type = type;
+	var_dec -> varName = varName;
+	var_dec -> commaVarNames = commaVarNames;
+	return var_dec; 
+}
+
+// subroutine body
+Subroutine_Body_t Subroutine_Body_new(List_t varDecs, List_t statements) {
+	Subroutine_Body_t subroutine_body = malloc(sizeof(*subroutine_body));
+	subroutine_body -> varDecs = varDecs;
+	subroutine_body -> statements = statements;
+	return subroutine_body;
+}
+
+// comma type varName
+Comma_Type_Var_Name_t Comma_Type_Var_Name_new(Type_t type, Var_Name_t varName) {
+	Comma_Type_Var_Name_t comma_type_var_name = malloc(sizeof(*comma_type_var_name));
+	comma_type_var_name -> type = type;
+	comma_type_var_name -> varName = varName;
+	return comma_type_var_name;
+}
+
+// parameter list
+Parameter_List_t Parameter_List_new(Type_t type, Var_Name_t varName, List_t commaVarNames) {
+	Parameter_List_t parameter_list = malloc(sizeof(*parameter_list));
+	parameter_list -> type = type;
+	parameter_list -> varName = varName;
+	parameter_list -> commaVarNames = commaVarNames;
+	return parameter_list;
+}
+
+// subroutine dec constructor void
+Subroutine_Dec_t Subroutine_Dec_Constructor_Void_new(Sub_Routine_Name_t subroutineName, Parameter_List_t parameter_list, Subroutine_Body_t subroutineBody) {
+	Subroutine_Dec_Constructor_Void subroutine_dec_constructor_void = malloc(sizeof(*subroutine_dec_constructor_void));
+	subroutine_dec_constructor_void -> kind = SUBROUTINE_DEC_CONSTRUCTOR_VOID;
+	subroutine_dec_constructor_void -> subroutineName = subroutineName;
+	subroutine_dec_constructor_void -> parameter_list = parameter_list;
+	subroutine_dec_constructor_void -> subroutineBody = subroutineBody;
+	return (Subroutine_Dec_t) subroutine_dec_constructor_void;
+}
+
+// subroutine dec constructor type
+Subroutine_Dec_t Subroutine_Dec_Constructor_Type_new(Type_t type, Sub_Routine_Name_t subroutineName, Parameter_List_t parameter_list, Subroutine_Body_t subroutineBody) {
+	Subroutine_Dec_Constructor_Type subroutine_dec_constructor_type = malloc(sizeof(*subroutine_dec_constructor_type));
+	subroutine_dec_constructor_type -> kind = SUBROUTINE_DEC_CONSTRUCTOR_TYPE;
+	subroutine_dec_constructor_type -> type = type;
+	subroutine_dec_constructor_type -> subroutineName = subroutineName;
+	subroutine_dec_constructor_type -> parameter_list = parameter_list;
+	subroutine_dec_constructor_type -> subroutineBody = subroutineBody;
+	return (Subroutine_Dec_t) subroutine_dec_constructor_type;
 }

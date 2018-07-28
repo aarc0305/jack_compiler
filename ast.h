@@ -10,7 +10,8 @@ typedef enum Class_Var_Dec_Kind_t {
 typedef enum Type_Kind_t {
 	TYPE_INT,
 	TYPE_BOOLEAN,
-	TYPE_CHAR
+	TYPE_CHAR,
+	TYPE_CLASS
 } Type_Kind_t;
 
 typedef enum Keyword_Constant_Kind_t {
@@ -64,21 +65,14 @@ typedef enum Statement_Kind_t {
 	STATEMENT_RETURN_EXPRESSION
 } Statement_Kind_t;
 
-// class
-typedef struct Class_t* Class_t;
-struct Class_t {
-	char* className;
-	List_t classVarDecs;
-	// TODO: 1. class var declaration 2. subroutine declaration
-};
-Class_t Class_new(char* className, List_t classVarDecs);
-
-// type
-typedef struct Type_t* Type_t;
-struct Type_t {
-	Type_Kind_t kind;
-};
-Type_t Type_new(Type_Kind_t kind);
+typedef enum Subroutine_Dec_Kind_t {
+	SUBROUTINE_DEC_CONSTRUCTOR_VOID,
+	SUBROUTINE_DEC_CONSTRUCTOR_TYPE,
+	SUBROUTINE_DEC_FUNCTION_VOID,
+	SUBROUTINE_DEC_FUNCTION_TYPE,
+	SUBROUTINE_DEC_METHOD_VOID,
+	SUBROUTINE_DEC_METHOD_TYPE
+} Subroutine_Dec_Kind_t;
 
 // className
 typedef struct Class_Name_t* Class_Name_t;
@@ -86,6 +80,22 @@ struct Class_Name_t {
 	char* className;
 };
 Class_Name_t Class_Name_new(char* className);
+
+// class
+typedef struct Class_t* Class_t;
+struct Class_t {
+	Class_Name_t className;
+	List_t classVarDecs;
+	List_t subroutineDecs;
+};
+Class_t Class_new(Class_Name_t className, List_t classVarDecs, List_t subroutineDecs);
+
+// type
+typedef struct Type_t* Type_t;
+struct Type_t {
+	Type_Kind_t kind;
+};
+Type_t Type_new(Type_Kind_t kind);
 
 // varName
 typedef struct Var_Name_t* Var_Name_t;
@@ -343,7 +353,65 @@ struct Statement_Return_Expression {
 };
 Statement_t Statement_Return_Expression_new();
 
+// var dec
+typedef struct Var_Dec_t* Var_Dec_t;
+struct Var_Dec_t {
+	Type_t type;
+	Var_Name_t varName;
+	List_t commaVarNames;
+};
+Var_Dec_t Var_Dec_new(Type_t type, Var_Name_t varName, List_t commaVarNames);
+
 // subroutine body
-// TODO: 
+typedef struct Subroutine_Body_t* Subroutine_Body_t;
+struct Subroutine_Body_t {
+	List_t varDecs;
+	List_t statements;
+};
+Subroutine_Body_t Subroutine_Body_new(List_t varDecs, List_t statements);
+
+// comma type varName
+typedef struct Comma_Type_Var_Name_t* Comma_Type_Var_Name_t;
+struct Comma_Type_Var_Name_t {
+	Type_t type;
+	Var_Name_t varName;
+};
+Comma_Type_Var_Name_t Comma_Type_Var_Name_new(Type_t type, Var_Name_t varName);
+
+// parameter list
+typedef struct Parameter_List_t* Parameter_List_t;
+struct Parameter_List_t {
+	Type_t type;
+	Var_Name_t varName;
+	List_t commaVarNames;
+};
+Parameter_List_t Parameter_List_new(Type_t type, Var_Name_t varName, List_t commaVarNames);
+
+//subroutine dec
+typedef struct Subroutine_Dec_t* Subroutine_Dec_t;
+struct Subroutine_Dec_t {
+	Subroutine_Dec_Kind_t kind;
+};
+
+// subroutine dec constructor void
+typedef struct Subroutine_Dec_Constructor_Void* Subroutine_Dec_Constructor_Void;
+struct Subroutine_Dec_Constructor_Void {
+	Subroutine_Dec_Kind_t kind;
+	Sub_Routine_Name_t subroutineName;
+	Parameter_List_t parameter_list;
+	Subroutine_Body_t subroutineBody;
+};
+Subroutine_Dec_t Subroutine_Dec_Constructor_Void_new(Sub_Routine_Name_t subroutineName, Parameter_List_t parameter_list, Subroutine_Body_t subroutineBody);
+
+// subroutine dec constructor type
+typedef struct Subroutine_Dec_Constructor_Type* Subroutine_Dec_Constructor_Type;
+struct Subroutine_Dec_Constructor_Type {
+	Subroutine_Dec_Kind_t kind;
+	Type_t type;
+	Sub_Routine_Name_t subroutineName;
+	Parameter_List_t parameter_list;
+	Subroutine_Body_t subroutineBody;
+};
+Subroutine_Dec_t Subroutine_Dec_Constructor_Type_new(Type_t type, Sub_Routine_Name_t subroutineName, Parameter_List_t parameter_list, Subroutine_Body_t subroutineBody);
 
 #endif

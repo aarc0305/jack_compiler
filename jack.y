@@ -4,12 +4,21 @@
 	#include "ast.h"
 	int yylex();
   	void yyerror (char *);
+  	Class_t class;
 %}
 
 %union {
 	Class_t classVal;
 	List_t classVarDecsVal;
 	Class_Var_Dec_t classVarDecVal;
+	List_t subroutineDecsVal;
+	Subroutine_Dec_t subroutineDecVal;
+	Parameter_List_t parameterListVal;
+	List_t commaTypeVarNamesVal;
+	Comma_Type_Var_Name_t commaTypeVarNameVal;
+	Subroutine_Body_t subroutineBodyVal;
+	List_t varDecsVal;
+	Var_Dec_t varDecVal;
 	Type_t typeVal;
 	Class_Name_t classNameVal;
 	Var_Name_t varNameVal;
@@ -73,6 +82,14 @@
 %type <classVal> class
 %type <classVarDecsVal> classVarDecs
 %type <classVarDecVal> classVarDec
+%type <subroutineDecsVal> subroutineDecs
+%type <subroutineDecVal> subroutineDec
+%type <parameterListVal> parameterList
+%type <commaTypeVarNamesVal> commaTypeVarNames
+%type <commaTypeVarNameVal> commaTypeVarName
+%type <subroutineBodyVal> subroutineBody
+%type <varDecsVal> varDecs
+%type <varDecVal> varDec
 %type <typeVal> type
 %type <classNameVal> className
 %type <varNameVal> varName 
@@ -101,13 +118,14 @@
 %left TIMES DIV
 %left NOT
 
+// the program starts from class
 %start class
 
 %%
 
 // BNF
 
-class: CLASS className '{' classVarDecs statements '}' 
+class: CLASS className '{' classVarDecs subroutineDecs '}' {class = Class_new($2, $4, $5);}
 ;
 
 classVarDecs: classVarDec classVarDecs {$$ = List_new($1, $2);}
@@ -118,9 +136,39 @@ classVarDec: STATIC type varName commaVarNames ';' {$$ = Class_Var_Dec_Static_ne
 | FIELD type varName commaVarNames ';' {$$ = Class_Var_Dec_Field_new($2, $3, $4);}
 ;
 
+subroutineDecs: subroutineDec subroutineDecs {$$ = List_new($1, $2);}
+| {$$ = 0;}
+;
+
+subroutineDec: CONSTRUCTOR VOID subRoutineName '(' parameterList ')' subroutineBody {$$ = Subroutine_Dec_Constructor_Void_new($3, $5, $7);}
+| CONSTRUCTOR type subRoutineName '(' parameterList ')' subroutineBody {$$ = Subroutine_Dec_Constructor_Type_new($2, $3, $5, $7);}
+;
+
+parameterList: type varName commaTypeVarNames {$$ = Parameter_List_new($1, $2, $3);}
+| {$$ = 0;}
+;
+
+commaTypeVarNames: commaTypeVarName commaTypeVarNames {$$ = List_new($1, $2);}
+| {$$ = 0;}
+;
+
+commaTypeVarName: ',' type varName {$$ = Comma_Type_Var_Name_new($2, $3);}
+;
+
+subroutineBody: '{' varDecs statements '}' {$$ = Subroutine_Body_new($2, $3);}
+;
+
+varDecs: varDec varDecs {$$ = List_new($1, $2);}
+| {$$ = 0;}
+;
+
+varDec: VAR type varName commaVarNames ';' {$$ = Var_Dec_new($2, $3, $4);}
+;
+
 type: INT {$$ = Type_new(TYPE_INT);}
 | BOOLEAN {$$ = Type_new(TYPE_BOOLEAN);}
 | CHAR {$$ = Type_new(TYPE_CHAR);}
+| className {Type_new(TYPE_CLASS);}
 ;
 
 className: ID {$$ = Class_Name_new($1);}

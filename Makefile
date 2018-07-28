@@ -2,14 +2,18 @@ LEX = flex
 YACC = bison
 CC = gcc
 
-a.out: ast.o list.o jack.tab.o lex.yy.o main.o
-	$(CC) ast.o list.o jack.tab.o lex.yy.o main.o
+a.out: ast.o list.o astPrinter.o jack.tab.o lex.yy.o main.o
+	$(CC) ast.o list.o astPrinter.o jack.tab.o lex.yy.o main.o
 
 ast.o: ast.c
 	$(CC) -c ast.c
+
 list.o: list.c
 	$(CC) -c list.c
-	
+
+astPrinter.o: astPrinter.c
+	$(CC) -c astPrinter.c
+
 jack.tab.o: jack.tab.c
 	$(CC) -c jack.tab.c
 
