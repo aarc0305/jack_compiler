@@ -10,11 +10,19 @@ Class_t Class_new(Class_Name_t className, List_t classVarDecs, List_t subroutine
 	return class;
 }
 
-// type
-Type_t Type_new(Type_Kind_t kind) {
-	Type_t type = malloc(sizeof(*type));
-	type -> kind = kind;
-	return type;
+// type primitive
+Type_t Type_Primitive_new(Type_Kind_t kind) {
+	Type_Primitive type_primitive = malloc(sizeof(*type_primitive));
+	type_primitive -> kind = kind;
+	return (Type_t) type_primitive;
+}
+
+// type class
+Type_t Type_Class_new(Type_Kind_t kind, Class_Name_t className) {
+	Type_Class type_class = malloc(sizeof(*type_class));
+	type_class -> kind = kind;
+	type_class -> className = className;
+	return (Type_t) type_class;
 }
 
 // class name
@@ -95,10 +103,10 @@ Op_Term_t Op_Term_new(Op_t op, Term_t term) {
 }
 
 // expression
-Expression_t Expression_new(Term_t term, List_t opTermList) {
+Expression_t Expression_new(Term_t term, List_t opTerms) {
 	Expression_t expression = malloc(sizeof(*expression));
 	expression -> term = term;
-	expression -> opTermList = opTermList;
+	expression -> opTerms = opTerms;
 	return expression;
 }
 
@@ -201,6 +209,9 @@ Term_t Term_Unary_Op_Term_new(Unary_Op_t unaryOp, Term_t term) {
 Statement_t Statement_Let_new(Var_Name_t varName, Expression_t expression) {
 	Statement_Let statement_let = malloc(sizeof(*statement_let));
 	statement_let -> kind = STATEMENT_LET;
+	statement_let -> varName = varName;
+	statement_let -> expression = expression;
+	return (Statement_t) statement_let;
 }
 
 // statement if

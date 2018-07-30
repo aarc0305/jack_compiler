@@ -95,7 +95,21 @@ typedef struct Type_t* Type_t;
 struct Type_t {
 	Type_Kind_t kind;
 };
-Type_t Type_new(Type_Kind_t kind);
+
+// type primitive
+typedef struct Type_Primitive* Type_Primitive;
+struct Type_Primitive {
+	Type_Kind_t kind;
+};
+Type_t Type_Primitive_new(Type_Kind_t kind);
+
+// type class
+typedef struct Type_Class* Type_Class;
+struct Type_Class {
+	Type_Kind_t kind;
+	Class_Name_t className;
+};
+Type_t Type_Class_new(Type_Kind_t kind, Class_Name_t className);
 
 // varName
 typedef struct Var_Name_t* Var_Name_t;
@@ -183,7 +197,7 @@ Op_Term_t Op_Term_new(Op_t op, Term_t term);
 typedef struct Expression_t* Expression_t;
 struct Expression_t {
 	Term_t term;
-	List_t opTermList;
+	List_t opTerms;
 };
 Expression_t Expression_new(Term_t term, List_t opTermList);
 

@@ -165,10 +165,10 @@ varDecs: varDec varDecs {$$ = List_new($1, $2);}
 varDec: VAR type varName commaVarNames ';' {$$ = Var_Dec_new($2, $3, $4);}
 ;
 
-type: INT {$$ = Type_new(TYPE_INT);}
-| BOOLEAN {$$ = Type_new(TYPE_BOOLEAN);}
-| CHAR {$$ = Type_new(TYPE_CHAR);}
-| className {Type_new(TYPE_CLASS);}
+type: INT {$$ = Type_Primitive_new(TYPE_INT);}
+| BOOLEAN {$$ = Type_Primitive_new(TYPE_BOOLEAN);}
+| CHAR {$$ = Type_Primitive_new(TYPE_CHAR);}
+| className {$$ = Type_Class_new(TYPE_CLASS, $1);}
 ;
 
 className: ID {$$ = Class_Name_new($1);}

@@ -1,6 +1,6 @@
 # Jack Compiler
 
-A compiler to compiler jack language to stack machine code
+A compiler to compile jack language to stack machine code
 
 ## How to use this ?
 
@@ -12,6 +12,6 @@ cd jack_compiler
 make
 
 # Compile a test program
-./a.out < test.txt
+./a.out < test.jack
 
 ```
