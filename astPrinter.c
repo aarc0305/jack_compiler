@@ -55,6 +55,40 @@ void Print_Keyword_Constant(Keyword_Constant_t keywordConstant) {
 	}
 }
 
+// print the comma expressions
+void Print_Comma_Expressions(List_t commaExpressions) {
+
+}
+
+// print the expression list
+void Print_Expression_List(Expression_List_t expressionList) {
+	printf("<expressionList>\n");
+	if (expressionList == 0) {
+		//nop
+	} else {
+		Expression_t expression = expressionList -> expression;
+		List_t commaExpressions = expressionList -> commaExpressions;
+		Print_Expression(expression);
+		Print_Comma_Expressions(commaExpressions);
+	}
+	printf("</expressionList>\n");
+}
+
+// print the subroutine call
+void Print_Subroutine_Call(Sub_Routine_Call_t subroutineCall) {
+	Sub_Routine_Call_Kind_t kind = (Sub_Routine_Call_Kind_t) subroutineCall -> kind;
+	if (kind == SUB_ROUTINE_SELF_FUNCTION) {
+		Sub_Routine_Call_Self_Function subRoutineCallSelfFunction = (Sub_Routine_Call_Self_Function) subroutineCall;
+		Sub_Routine_Name_t subRoutineName = subRoutineCallSelfFunction -> subRoutineName;
+		Expression_List_t expressionList = subRoutineCallSelfFunction -> expressionList;
+		Print_Subroutine_Name(subRoutineName);
+		printf("<symbol>(</symbol>\n");
+		Print_Expression_List(expressionList);
+		printf("<symbol>)</symbol>\n");
+	}
+	// TODO:
+}
+
 // print the term
 void Print_Term(Term_t term) {
 	// TODO:
@@ -71,6 +105,10 @@ void Print_Term(Term_t term) {
 		Term_Var_Name termVarName = (Term_Var_Name) term;
 		Var_Name_t varName = termVarName -> varName;
 		Print_Var_Name(varName);
+	} else if (kind == TERM_SUBROUTINECALL) {
+		Term_Sub_Routine_Call termSubroutineCall = (Term_Sub_Routine_Call) term;
+		Sub_Routine_Call_t subRoutineCall = termSubroutineCall -> subRoutineCall;
+		Print_Subroutine_Call(subRoutineCall);
 	}
 }
 
@@ -141,12 +179,16 @@ void Print_Subroutine_Body(Subroutine_Body_t subroutineBody) {
 // print the parameter list
 void Print_Parameter_List(Parameter_List_t parameter_list) {
 	printf("<parameterList>\n");
-	Type_t type = parameter_list -> type;
-	Var_Name_t varName = parameter_list -> varName;
-	List_t commaVarNames = parameter_list -> commaVarNames;
-	Print_Type(type);
-	Print_Var_Name(varName);
-	Print_Comma_Var_Names(commaVarNames);
+	if (parameter_list == 0) {
+		// nop
+	} else {
+		Type_t type = parameter_list -> type;
+		Var_Name_t varName = parameter_list -> varName;
+		List_t commaVarNames = parameter_list -> commaVarNames;
+		Print_Type(type);
+		Print_Var_Name(varName);
+		Print_Comma_Var_Names(commaVarNames);
+	}
 	printf("</parameterList>\n");
 }
 

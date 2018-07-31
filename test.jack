@@ -1,6 +1,6 @@
 class Main {    
 	static int t;
     constructor void main() {
-        
+        let t = hello(5);
     }
 }
