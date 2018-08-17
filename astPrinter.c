@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "astPrinter.h"
 
-// print the type
 void Print_Type(Type_t type) {
 	Type_Kind_t kind = type -> kind;
 	if (kind == TYPE_INT) {
@@ -24,14 +23,12 @@ void Print_Type(Type_t type) {
 	}
 }
 
-// print varName
 void Print_Var_Name(Var_Name_t varName) {
 	printf("<identifier>");
 	printf("%s", varName -> varName);
 	printf("</identifier>\n");
 }
 
-// print comma var names
 void Print_Comma_Var_Names(List_t commaVarNames) {
 	while (commaVarNames) {
 		Comma_Var_Name_t comma_var_name = commaVarNames -> data;
@@ -41,7 +38,6 @@ void Print_Comma_Var_Names(List_t commaVarNames) {
 	} 
 }
 
-// print the keyword constant
 void Print_Keyword_Constant(Keyword_Constant_t keywordConstant) {
 	Keyword_Constant_Kind_t kind = keywordConstant -> kind;
 	if (kind == KEYWORD_TRUE) {
@@ -55,16 +51,19 @@ void Print_Keyword_Constant(Keyword_Constant_t keywordConstant) {
 	}
 }
 
-// print the comma expressions
 void Print_Comma_Expressions(List_t commaExpressions) {
-
+	while (commaExpressions) {
+		Comma_Expression_t commaExpression = commaExpressions -> data;
+		printf("<symbol>,</symbol>\n");
+		Print_Expression(commaExpression -> expression);
+		commaExpressions = commaExpressions -> next;
+	}
 }
 
-// print the expression list
 void Print_Expression_List(Expression_List_t expressionList) {
 	printf("<expressionList>\n");
 	if (expressionList == 0) {
-		//nop
+		// nop
 	} else {
 		Expression_t expression = expressionList -> expression;
 		List_t commaExpressions = expressionList -> commaExpressions;
@@ -74,7 +73,6 @@ void Print_Expression_List(Expression_List_t expressionList) {
 	printf("</expressionList>\n");
 }
 
-// print the subroutine call
 void Print_Subroutine_Call(Sub_Routine_Call_t subroutineCall) {
 	Sub_Routine_Call_Kind_t kind = (Sub_Routine_Call_Kind_t) subroutineCall -> kind;
 	if (kind == SUB_ROUTINE_SELF_FUNCTION) {
@@ -85,13 +83,34 @@ void Print_Subroutine_Call(Sub_Routine_Call_t subroutineCall) {
 		printf("<symbol>(</symbol>\n");
 		Print_Expression_List(expressionList);
 		printf("<symbol>)</symbol>\n");
+		printf("<symbol>;</symbol>\n");
+	} else if (kind == SUB_ROUTINE_OBJECT_FUNCTION) {
+		Sub_Routine_Call_Object_Function subRoutineCallObjectFunction = (Sub_Routine_Call_Object_Function) subroutineCall;
+		Var_Name_t varName = subRoutineCallObjectFunction -> varName;
+		Sub_Routine_Name_t subRoutineName = subRoutineCallObjectFunction -> subRoutineName;
+		Expression_List_t expressionList = subRoutineCallObjectFunction -> expressionList;
+		Print_Var_Name(varName);
+		printf("<symbol>.</symbol>\n");
+		Print_Subroutine_Name(subRoutineName);
+		printf("<symbol>(</symbol>\n");
+		Print_Expression_List(expressionList);
+		printf("<symbol>)</symbol>\n");
+		printf("<symbol>;</symbol>\n");
 	}
-	// TODO:
+	// BUG: There is a reduce/reduce conflict in the jack.y
 }
 
-// print the term
+void Print_UnaryOp(Unary_Op_t unaryOp) {
+	Unary_Op_Kind_t kind = unaryOp -> kind;
+	if (kind == UNARY_OP_DASH) {
+		printf("<symbol>-</symbol>\n");
+	} else if (kind == UNARY_OP_WAVE) {
+		printf("<symbol>~</symbol>\n");
+	}
+}
+
 void Print_Term(Term_t term) {
-	// TODO:
+	printf("<term>\n");
 	Term_Kind_t kind = term -> kind;
 	if (kind == TERM_INTEGERCONSTANT) {
 		Term_Integer_Constant termIntegerConstant = (Term_Integer_Constant) term;
@@ -109,21 +128,73 @@ void Print_Term(Term_t term) {
 		Term_Sub_Routine_Call termSubroutineCall = (Term_Sub_Routine_Call) term;
 		Sub_Routine_Call_t subRoutineCall = termSubroutineCall -> subRoutineCall;
 		Print_Subroutine_Call(subRoutineCall);
+	} else if (kind == TERM_EXPRESSION) {
+		Term_Expression termExpression = (Term_Expression) term;
+		Expression_t expression = termExpression -> expression;
+		printf("<symbol>(</symbol>\n");
+		Print_Expression(expression);
+		printf("<symbol>)</symbol>\n");
+	} else if (kind == TERM_UNARYOPTERM) {
+		Term_Unary_Op_Term termUnaryOpTerm = (Term_Unary_Op_Term) term;
+		Unary_Op_t unaryOp = termUnaryOpTerm -> unaryOp;
+		Term_t term = termUnaryOpTerm -> term;
+		Print_UnaryOp(unaryOp);
+		Print_Term(term);
+	}
+	printf("</term>\n");
+}
+
+void Print_Op(Op_t op) {
+	Op_Kind_t kind = op -> kind;
+	if (kind == OP_PLUS) {
+		printf("<symbol>+</symbol>\n");
+	} else if (kind == OP_MINUS) {
+		printf("<symbol>-</symbol>\n");
+	} else if (kind == OP_TIMES) {
+		printf("<symbol>*</symbol>\n");
+	} else if (kind == OP_DIV) {
+		printf("<symbol>/</symbol>\n");
+	} else if (kind == OP_AND) {
+		printf("<symbol>&</symbol>\n");
+	} else if (kind == OP_OR) {
+		printf("<symbol>|</symbol>\n");
+	} else if (kind == OP_LESS) {
+		printf("<symbol><</symbol>\n");
+	} else if (kind == OP_MORE) {
+		printf("<symbol>></symbol>\n");
+	} else if (kind == OP_EQUAL) {
+		printf("<symbol>==</symbol>\n");
 	}
 }
 
-// print the expression
-void Print_Expression(Expression_t expression) {
-	// TODO:
-	Term_t term = expression -> term;
-	List_t opTerms = expression -> opTerms;
+void Print_Op_Term(Op_Term_t opTerm) {
+	Op_t op = opTerm -> op;
+	Term_t term = opTerm -> term;
+	Print_Op(op);
 	Print_Term(term);
 }
 
-// print the statement
+void Print_Op_Terms(List_t opTerms) {
+	while (opTerms) {
+		Op_Term_t opTerm = opTerms -> data;
+		Print_Op_Term(opTerm);
+		opTerms = opTerms -> next;
+	}
+}
+
+void Print_Expression(Expression_t expression) {
+	printf("<expression>\n");
+	Term_t term = expression -> term;
+	List_t opTerms = expression -> opTerms;
+	Print_Term(term);
+	Print_Op_Terms(opTerms);
+	printf("</expression>\n");
+}
+
 void Print_Statement(Statement_t statement) {
 	Statement_Kind_t kind = statement -> kind;
 	if (kind == STATEMENT_LET) {
+		printf("<letStatement>\n");
 		Statement_Let statementLet = (Statement_Let) statement;
 		Var_Name_t varName = statementLet -> varName;
 		Expression_t expression = statementLet -> expression;
@@ -132,12 +203,71 @@ void Print_Statement(Statement_t statement) {
 		printf("<symbol>=</symbol>\n");
 		Print_Expression(expression);
 		printf("<symbol>;</symbol>\n");
+		printf("</letStatement>\n");
 	} else if (kind == STATEMENT_IF) {
-		// TODO:
+		printf("<ifStatement>\n");
+		printf("<keyword>if</keyword>\n");
+		Statement_If statementIf = (Statement_If) statement;
+		Expression_t expression = statementIf -> expression;
+		List_t statements = statementIf -> statements;
+		printf("<symbol>(</symbol>\n");
+		Print_Expression(expression);
+		printf("<symbol>)</symbol>\n");
+		printf("<symbol>{</symbol>\n");
+		Print_Statements(statements);
+		printf("<symbol>}</symbol>\n");
+		printf("</ifStatement>\n");
+	} else if (kind == STATEMENT_IF_ELSE) {
+		printf("<ifStatement>\n");
+		printf("<keyword>if</keyword>\n");
+		Statement_If_Else statementIfElse = (Statement_If_Else) statement;
+		Expression_t expression = statementIfElse -> expression;
+		List_t ifStatements = statementIfElse -> ifStatements;
+		List_t elseStatements = statementIfElse -> elseStatements;
+		printf("<symbol>(</symbol>\n");
+		Print_Expression(expression);
+		printf("<symbol>)</symbol>\n");
+		printf("<symbol>{</symbol>\n");
+		Print_Statements(ifStatements);
+		printf("<symbol>}</symbol>\n");
+		printf("<keyword>else</keyword>\n");
+		printf("<symbol>{</symbol>\n");
+		Print_Statements(elseStatements);
+		printf("<symbol>}</symbol>\n");
+		printf("</ifStatement>\n");
+	} else if (kind == STATEMENT_WHILE) {
+		printf("<whileStatement>\n");
+		printf("<kwyword>while</keyword>\n");
+		Statement_While statementWhile = (Statement_While) statement;
+		Expression_t expression = statementWhile -> expression;
+		List_t statements = statementWhile -> statements;
+		printf("<symbol>(</symbol>\n");
+		Print_Expression(expression);
+		printf("<symbol>)</symbol>\n");
+		printf("<symbol>{</symbol>\n");
+		Print_Statements(statements);
+		printf("<symbol>}</symbol>\n");
+		printf("</whileStatement>\n");
+	} else if (kind == STATEMENT_DO) {
+		printf("<doStatement>\n");
+		printf("<keyword>do</keyword>\n");
+		Statement_Do statementDo = (Statement_Do) statement;
+		Sub_Routine_Call_t subRoutineCall =  statementDo -> sub_routine_call;
+		Print_Subroutine_Call(subRoutineCall);
+		printf("</doStatement>\n");
+	} else if (kind == STATEMENT_RETURN) {
+		printf("<returnStatement>\n");
+		printf("<keyword>return</keyword>\n");
+		printf("</returnStatement>\n");
+	} else if (kind == STATEMENT_RETURN_EXPRESSION) {
+		printf("<returnStatement>\n");
+		printf("<keyword>return</keyword>\n");
+		Statement_Return_Expression statementReturnExpression = (Statement_Return_Expression) statement;
+		Print_Expression(statementReturnExpression -> expression);
+		printf("</returnStatement>\n");
 	}
 }
 
-// print the statements
 void Print_Statements(List_t statements) {
 	while (statements) {
 		Statement_t statement = statements -> data;
@@ -146,7 +276,6 @@ void Print_Statements(List_t statements) {
 	}
 }
 
-// print the var dec
 void Print_Var_Dec(Var_Dec_t varDec) {
 	Type_t type = varDec -> type;
 	Var_Name_t varName = varDec -> varName;
@@ -158,7 +287,6 @@ void Print_Var_Dec(Var_Dec_t varDec) {
 	printf("<symbol>;</symbol>\n");
 }
 
-// print the var decs
 void Print_Var_Decs(List_t varDecs) {
 	while (varDecs) {
 		Var_Dec_t varDec = (varDecs -> data);
@@ -167,16 +295,15 @@ void Print_Var_Decs(List_t varDecs) {
 	} 
 }
 
-// print the subroutine body
 void Print_Subroutine_Body(Subroutine_Body_t subroutineBody) {
+	printf("<subroutineBody>\n");
 	List_t varDecs = subroutineBody -> varDecs;
 	List_t statements = subroutineBody -> statements;
 	Print_Var_Decs(varDecs);
 	Print_Statements(statements);
-
+	printf("</subroutineBody>\n");
 }
 
-// print the parameter list
 void Print_Parameter_List(Parameter_List_t parameter_list) {
 	printf("<parameterList>\n");
 	if (parameter_list == 0) {
@@ -192,7 +319,6 @@ void Print_Parameter_List(Parameter_List_t parameter_list) {
 	printf("</parameterList>\n");
 }
 
-// print the sub routine name
 void Print_Subroutine_Name(Sub_Routine_Name_t routine_name) {
 	char* name = routine_name -> subRoutineName;
 	printf("<identifier>");
@@ -200,28 +326,47 @@ void Print_Subroutine_Name(Sub_Routine_Name_t routine_name) {
 	printf("</identifier>\n");
 }
 
-// print the subroutine dec
 void Print_Subroutine_Dec(Subroutine_Dec_t subroutineDec) {
 	Subroutine_Dec_Kind_t kind = subroutineDec -> kind;
 	if (kind == SUBROUTINE_DEC_CONSTRUCTOR_VOID) {
 		printf("<subroutineDec>\n");
 		printf("<keyword>constructor</keyword>\n");
 		printf("<keyword>void</keyword>\n");
-		// TODO:
-		Subroutine_Dec_Constructor_Void subroutine_dec_constructor_void = (Subroutine_Dec_Constructor_Void) subroutineDec;
-		Sub_Routine_Name_t routine_name = subroutine_dec_constructor_void -> subroutineName;
-		Parameter_List_t parameter_list = subroutine_dec_constructor_void -> parameter_list;
-		Subroutine_Body_t subroutine_body = subroutine_dec_constructor_void -> subroutineBody;
-		Print_Subroutine_Name(routine_name);
+		Subroutine_Dec_Constructor_Void subroutineDecConstructorVoid = (Subroutine_Dec_Constructor_Void) subroutineDec;
+		Sub_Routine_Name_t subroutineName = subroutineDecConstructorVoid -> subroutineName;
+		Parameter_List_t parameterList = subroutineDecConstructorVoid -> parameter_list;
+		Subroutine_Body_t subroutineBody = subroutineDecConstructorVoid -> subroutineBody;
+		Print_Subroutine_Name(subroutineName);
 		printf("<symbol>(</symbol>\n");
-		Print_Parameter_List(parameter_list);
+		Print_Parameter_List(parameterList);
 		printf("<symbol>)</symbol>\n");
 		printf("<symbol>{</symbol>\n");
-		Print_Subroutine_Body(subroutine_body);
+		Print_Subroutine_Body(subroutineBody);
 		printf("<symbol>}</symbol>\n");
 		printf("</subroutineDec>\n");
-
+	} else if (kind == SUBROUTINE_DEC_CONSTRUCTOR_TYPE) {
+		printf("<subroutineDec>\n");
+		printf("<keyword>constructor</keyword>\n");
+		Subroutine_Dec_Constructor_Type subroutineDecConstructorType = (Subroutine_Dec_Constructor_Type) subroutineDec;
+		Type_t type = subroutineDecConstructorType -> type;
+		Sub_Routine_Name_t subroutineName = subroutineDecConstructorType -> subroutineName;
+		Parameter_List_t parameterList = subroutineDecConstructorType -> parameter_list;
+		Subroutine_Body_t subroutineBody = subroutineDecConstructorType -> subroutineBody;
+		Print_Type(type);
+		Print_Subroutine_Name(subroutineName);
+		printf("<symbol>(</symbol>\n");
+		Print_Parameter_List(parameterList);
+		printf("<symbol>)</symbol>\n");
+		printf("<symbol>{</symbol>\n");
+		Print_Subroutine_Body(subroutineBody);
+		printf("<symbol>}</symbol>\n");
+	} else if (kind == SUBROUTINE_DEC_FUNCTION_VOID) {
+		printf("<subroutineDec>\n");
+		printf("<keyword>function</keyword>\n");
+		printf("<keyword>void</keyword>\n");
 	}
+	 // TODO
+	
 }
 
 // print the subroutune decs
@@ -233,7 +378,6 @@ void Print_Subroutine_Decs(List_t subroutineDecs) {
 	}
 }
 
-// print the class var dec
 void Print_Class_Var_Dec(Class_Var_Dec_t class_var_dec) {
 	Class_Var_Dec_Kind_t kind = class_var_dec -> kind;
 	if (kind == CLASS_VAR_STATIC) {
@@ -263,7 +407,6 @@ void Print_Class_Var_Dec(Class_Var_Dec_t class_var_dec) {
 	}
 }
 
-// print the class var decs
 void Print_Class_Var_Decs(List_t classVarDecs) {
 	while(classVarDecs) {
 		Class_Var_Dec_t class_var_dec = classVarDecs -> data;
@@ -272,7 +415,6 @@ void Print_Class_Var_Decs(List_t classVarDecs) {
 	}
 }
 
-// print the class name
 void Print_Class_Name(Class_Name_t className) {
 	char* name = className -> className;
 	printf("<identifier>");
@@ -280,7 +422,6 @@ void Print_Class_Name(Class_Name_t className) {
 	printf("</identifier>\n");
 }
 
-// print the class
 void Print_Class(Class_t class) {
 	printf("<class>\n");
 	printf("<keyword>class</keyword>\n");

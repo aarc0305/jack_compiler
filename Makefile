@@ -2,8 +2,8 @@ LEX = flex
 YACC = bison
 CC = gcc
 
-a.out: ast.o list.o astPrinter.o jack.tab.o lex.yy.o main.o
-	$(CC) ast.o list.o astPrinter.o jack.tab.o lex.yy.o main.o
+a.out: ast.o list.o astPrinter.o semantic.o jack.tab.o lex.yy.o main.o
+	$(CC) ast.o list.o astPrinter.o semantic.o jack.tab.o lex.yy.o main.o
 
 ast.o: ast.c
 	$(CC) -c ast.c
@@ -14,6 +14,9 @@ list.o: list.c
 astPrinter.o: astPrinter.c
 	$(CC) -c astPrinter.c
 
+semantic.o: semantic.c
+	$(CC) -c semantic.c
+	
 jack.tab.o: jack.tab.c
 	$(CC) -c jack.tab.c
 
@@ -30,4 +33,4 @@ main.o: main.c
 	$(CC) -c main.c
 
 clean:
-	rm -rf *.o jack.tab.c lex.yy.c a.out
+	rm -rf *.o jack.tab.h jack.tab.c lex.yy.c a.out

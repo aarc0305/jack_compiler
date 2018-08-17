@@ -232,7 +232,7 @@ term: INTNUM {$$ = Term_Integer_Constant_new($1);}
 subroutineCall: subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Self_Function_new($1, $3);}
 // BUG: There are reduce/reduce conflict here because these two rules are the same
 | varName '.' subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Object_Function_new($1, $3, $5);}
-| className '.' subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Static_Function_new($1, $3, $5);}
+// | className '.' subRoutineName '(' expressionList ')' {$$ = Sub_Routine_Call_Static_Function_new($1, $3, $5);}
 ;
 
 op: ADD {$$ = Op_new(OP_PLUS);}

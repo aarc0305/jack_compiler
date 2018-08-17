@@ -1,6 +1,11 @@
 class Main {    
 	static int t;
-    constructor void main() {
-        let t = hello(5);
+    constructor int main() {
+        if (4 > 2) {
+        	let e = 9;
+        } else {
+        	let y = 0;
+        	do dd.ho();
+        }
     }
 }
