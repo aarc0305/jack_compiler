@@ -1,11 +1,4 @@
 class Main {    
-	static int t;
-    constructor int main() {
-        if (4 > 2) {
-        	let e = 9;
-        } else {
-        	let y = 0;
-        	do dd.ho();
-        }
-    }
+	static bool d, b, v;
+	field bool d, b, v;
 }

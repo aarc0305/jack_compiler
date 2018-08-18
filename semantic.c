@@ -1,16 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "string.h"
 #include "semantic.h"
 
 List_t table = 0;
 
-// Insert one indentifier in to the symbol table
-void Table_Insert(char* id, Type_t type) {
-
+St_Element_t St_Element_new(char* id, Type_t type) {
+	St_Element_t stElement = malloc(sizeof(*stElement));
+	stElement -> id = id;
+	stElement -> type = type;
+	return stElement;
 }
 
-void Table_Lookup(char* id) {
+// Insert one indentifier in to the symbol table
+void Table_Insert(char* newId, Type_t type) {
+	List_t tableReplica = table;
+	while (tableReplica) {
+		char* oldId = ((St_Element_t) (tableReplica -> data)) -> id;
+		if (strcmp(oldId, newId) == 0) {
+			printf("The identifier is already esisted!\n");
+			return;
+		}
+		tableReplica = tableReplica -> next;
+	}
+	St_Element_t stElement = St_Element_new(newId, type);
+	table = List_new(stElement, table);
+}
 
+Type_t Table_Lookup(char* id) {
+	List_t tableReplica = table;
+	while (tableReplica) {
+		St_Element_t stElement = (St_Element_t) (tableReplica -> data);
+		char* st_id = stElement -> id;
+		if (strcmp(id, st_id) == 0) {
+			return (Type_t) (stElement -> type);
+		}
+		tableReplica = tableReplica -> next;
+	}
+	printf("The indentifier is not found in symbol table.\n");
+	return 0;
 }
 
 void Table_Pop_One() {
@@ -29,16 +57,6 @@ void Check_Subroutine_Decs(List_t subroutineDecs) {
 	}
 }
 
-void Check_Var_Name(Var_Name_t varName, Type_t type) {
-	char* name = varName -> varName;
-	Table_Insert(name, type);
-	return;
-}
-
-void Check_Comma_Var_Names(List_t commaVarNames, Type_t type) {
-
-}
-
 void Check_Var_Dec(Class_Var_Dec_t classVarDec) {
 	Class_Var_Dec_Kind_t kind = classVarDec -> kind;
 	if (kind == CLASS_VAR_STATIC) {
@@ -46,8 +64,25 @@ void Check_Var_Dec(Class_Var_Dec_t classVarDec) {
 		Type_t type = classVarDecStatic -> type;
 		Var_Name_t varName = classVarDecStatic -> varName;
 		List_t commaVarNames = classVarDecStatic -> commaVarNames;
-		Check_Var_Name(varName, type);
-		Check_Comma_Var_Names(commaVarNames, type);
+		Table_Insert(varName -> varName, type);
+		while (commaVarNames) {
+			Comma_Var_Name_t commaVarName = commaVarNames -> data;
+			Var_Name_t varName = commaVarName -> varName;
+			Table_Insert(varName -> varName, type);
+			commaVarNames = commaVarNames -> next;
+		}
+	} else if (kind == CLASS_VAR_FIELD) {
+		Class_Var_Dec_Field classVarDecField = (Class_Var_Dec_Field) classVarDec;
+		Type_t type = classVarDecField -> type;
+		Var_Name_t varName = classVarDecField -> varName;
+		List_t commaVarNames = classVarDecField -> commaVarNames;
+		Table_Insert(varName -> varName, type);
+		while (commaVarNames) {
+			Comma_Var_Name_t commaVarName = commaVarNames -> data;
+			Var_Name_t varName = commaVarName -> varName;
+			Table_Insert(varName -> varName, type);
+			commaVarNames = commaVarNames -> next;
+		}
 	}
 }
 
