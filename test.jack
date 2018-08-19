@@ -1,4 +1,12 @@
 class Main {    
 	static bool d, b, v;
-	field bool d, b, v;
+	static bool f;
+
+	constructor void hello() {
+
+	}
+
+	constructor void hello() {
+
+	}
 }

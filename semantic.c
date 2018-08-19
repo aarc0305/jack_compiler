@@ -4,6 +4,7 @@
 #include "semantic.h"
 
 List_t table = 0;
+List_t functionTable = 0;
 
 St_Element_t St_Element_new(char* id, Type_t type) {
 	St_Element_t stElement = malloc(sizeof(*stElement));
@@ -12,19 +13,23 @@ St_Element_t St_Element_new(char* id, Type_t type) {
 	return stElement;
 }
 
-// Insert one indentifier in to the symbol table
-void Table_Insert(char* newId, Type_t type) {
+/* 
+    Insert one indentifier in to the symbol table.
+    Return 0 when successful; Otherwise, return -1.
+*/
+int Table_Insert(char* newId, Type_t type) {
 	List_t tableReplica = table;
 	while (tableReplica) {
 		char* oldId = ((St_Element_t) (tableReplica -> data)) -> id;
 		if (strcmp(oldId, newId) == 0) {
 			printf("The identifier is already esisted!\n");
-			return;
+			return -1;
 		}
 		tableReplica = tableReplica -> next;
 	}
 	St_Element_t stElement = St_Element_new(newId, type);
 	table = List_new(stElement, table);
+	return 0;
 }
 
 Type_t Table_Lookup(char* id) {
@@ -51,24 +56,75 @@ void Table_Pop_One() {
 	free(oldptr);
 }
 
-void Check_Subroutine_Decs(List_t subroutineDecs) {
+// Return 0 when successful; Otherwise, return -1.
+int Function_Table_Insert(char* newFunctionName) {
+	// See if the functionName is already existed.
+	List_t functionTableReplica = functionTable;
+	while (functionTableReplica) {
+		char* oldFunctionName = functionTableReplica -> data;
+		if (strcmp(oldFunctionName, newFunctionName) == 0) {
+			printf("The function name is already used!\n");
+			return -1;
+		}
+		functionTableReplica = functionTableReplica -> next;
+	}
+	// If the function name is not existed in the function table, insert it.
+	functionTable = List_new(newFunctionName, functionTable);
+	return 0;
+}
+
+void Function_Table_Pop_One () {
+	if (functionTable == 0) {
+		printf("The function table is empty\n");
+	}
+	List_t oldptr = functionTable;
+	functionTable = functionTable -> next;
+	free(oldptr);
+}
+
+void Check_Subroutine_Name(Sub_Routine_Name_t subroutineName, int* funcNum) {
+	char* name = subroutineName -> subRoutineName;
+	if (Function_Table_Insert(name) == 0) {
+		(*funcNum)++;
+	}
+}
+
+void Check_Subroutine_Dec(Subroutine_Dec_t subroutineDec, int* varNum, int* funcNum) {
+	Subroutine_Dec_Kind_t kind = subroutineDec -> kind;
+	if (kind == SUBROUTINE_DEC_CONSTRUCTOR_VOID) {
+		Subroutine_Dec_Constructor_Void subroutuneDecConstructorVoid = (Subroutine_Dec_Constructor_Void) subroutineDec;
+		Sub_Routine_Name_t subroutineName = subroutuneDecConstructorVoid -> subroutineName;
+		Parameter_List_t parameterList = subroutuneDecConstructorVoid -> parameter_list;
+		Subroutine_Body_t subroutineBody = subroutuneDecConstructorVoid -> subroutineBody;
+		Check_Subroutine_Name(subroutineName, funcNum);
+		// TODO: parameterList and subroutineBody
+	}
+}
+
+void Check_Subroutine_Decs(List_t subroutineDecs, int* varNum, int* funcNum) {
 	while (subroutineDecs) {
+		Subroutine_Dec_t subroutineDec = subroutineDecs -> data;
+		Check_Subroutine_Dec(subroutineDec, varNum, funcNum);
 		subroutineDecs = subroutineDecs -> next;
 	}
 }
 
-void Check_Var_Dec(Class_Var_Dec_t classVarDec) {
+void Check_Var_Dec(Class_Var_Dec_t classVarDec, int* varNum) {
 	Class_Var_Dec_Kind_t kind = classVarDec -> kind;
 	if (kind == CLASS_VAR_STATIC) {
 		Class_Var_Dec_Static classVarDecStatic = (Class_Var_Dec_Static) classVarDec;
 		Type_t type = classVarDecStatic -> type;
 		Var_Name_t varName = classVarDecStatic -> varName;
 		List_t commaVarNames = classVarDecStatic -> commaVarNames;
-		Table_Insert(varName -> varName, type);
+		if (Table_Insert(varName -> varName, type) == 0) {
+			(*varNum)++;
+		}
 		while (commaVarNames) {
 			Comma_Var_Name_t commaVarName = commaVarNames -> data;
 			Var_Name_t varName = commaVarName -> varName;
-			Table_Insert(varName -> varName, type);
+			if (Table_Insert(varName -> varName, type) == 0) {
+				(*varNum)++;
+			}
 			commaVarNames = commaVarNames -> next;
 		}
 	} else if (kind == CLASS_VAR_FIELD) {
@@ -76,27 +132,51 @@ void Check_Var_Dec(Class_Var_Dec_t classVarDec) {
 		Type_t type = classVarDecField -> type;
 		Var_Name_t varName = classVarDecField -> varName;
 		List_t commaVarNames = classVarDecField -> commaVarNames;
-		Table_Insert(varName -> varName, type);
+		if (Table_Insert(varName -> varName, type) == 0) {
+			(*varNum)++;
+		}
 		while (commaVarNames) {
 			Comma_Var_Name_t commaVarName = commaVarNames -> data;
 			Var_Name_t varName = commaVarName -> varName;
-			Table_Insert(varName -> varName, type);
+			if (Table_Insert(varName -> varName, type) == 0) {
+				(*varNum)++;
+			}
 			commaVarNames = commaVarNames -> next;
 		}
 	}
 }
 
-void Check_Class_Var_Decs(List_t classVarDecs) {
+void Check_Class_Var_Decs(List_t classVarDecs, int* varNum) {
 	while (classVarDecs) {
 		Class_Var_Dec_t classVarDec = classVarDecs -> data;
-		Check_Var_Dec(classVarDec);
+		Check_Var_Dec(classVarDec, varNum);
 		classVarDecs = classVarDecs -> next;
 	}
 }
 
 void Check_Class(Class_t class) {
+	// varNum records the number of variable in the scope of this class.
+	int* varNum = malloc(sizeof(*varNum));
+	(*varNum) = 0;
+
+	// funcNum records the number of functions in the scope of this class.
+	int* funcNum = malloc(sizeof(*funcNum));
+	(*funcNum) = 0;
+
 	List_t classVarDecs = class -> classVarDecs;
 	List_t subroutineDecs = class -> subroutineDecs;
-	Check_Class_Var_Decs(classVarDecs);
-	Check_Subroutine_Decs(subroutineDecs);
+	Check_Class_Var_Decs(classVarDecs, varNum);
+	Check_Subroutine_Decs(subroutineDecs, varNum, funcNum);
+
+	// Pop the variables from the symbol table used in the scope of this class
+	for (int i = 0; i < (*varNum); i++) {
+		Table_Pop_One();
+	}
+	free(varNum);
+
+	// Pop the name of functions from the function table used in the scope of this class.
+	for (int i = 0; i < (*funcNum); i++) {
+		Function_Table_Pop_One();
+	}
+	free(funcNum);
 }
